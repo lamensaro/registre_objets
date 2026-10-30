@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8f6">
+  <title>{% block title %}Objets trouvés du campus{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#172321",
+            forest: "#1d5948",
+            mint: "#e5f1eb",
+            paper: "#f7f8f6",
+            muted: "#6d7974"
+          },
+          boxShadow: {
+            soft: "0 18px 50px rgba(23, 35, 33, .07)"
+          },
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "DM Sans", sans-serif; }
+    h1, h2, h3, .brand { font-family: "Manrope", sans-serif; }
+    input:not([type="checkbox"]):not([type="radio"]),
+    select, textarea {
+      width: 100%; border: 1px solid #dfe5e1; border-radius: .85rem;
+      background: #fff; padding: .8rem 1rem; color: #172321;
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #1d5948; box-shadow: 0 0 0 3px rgba(29, 89, 72, .12);
+    }
+    textarea { resize: vertical; }
+    form p { margin-bottom: 1.15rem; }
+    form p label { display: block; margin-bottom: .45rem; font-size: .875rem; font-weight: 600; color: #34413c; }
+    form p .helptext { display: block; margin-top: .45rem; color: #76817c; font-size: .8rem; }
+    form ul.errorlist { margin: .35rem 0 0; color: #b42318; font-size: .85rem; list-style: none; padding: 0; }
+    ::selection { background: #cfe7da; color: #172321; }
+    @keyframes notification-arrive {
+      from { opacity: 0; transform: translateY(12px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .notification-arrive { animation: notification-arrive .25s ease-out both; }
+  </style>
+</head>
+<body class="min-h-screen bg-paper text-ink antialiased">
+  <header class="sticky top-0 z-30 border-b border-black/[.06] bg-white/90 backdrop-blur-xl">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-4 sm:px-8" aria-label="Navigation principale">
+      <a href="{% url 'liste_objets' %}" class="brand flex items-center gap-3 text-lg font-extrabold tracking-tight text-ink">
+        <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-forest text-white shadow-sm">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/>
+          </svg>
+        </span>
+        <span class="min-w-0">
+          {% if user.is_authenticated %}
+            <span class="block max-w-48 truncate">{{ user.get_username }}</span>
+            <span class="hidden text-xs font-medium tracking-normal text-muted sm:block">Mon espace</span>
+          {% else %}
+            <span>Retrouvé<span class="text-forest">.</span><span class="hidden text-xs font-medium tracking-normal text-muted sm:inline"> · Campus</span></span>
+          {% endif %}
+        </span>
+      </a>
+      <div class="flex items-center gap-1 sm:gap-2">
+        <a href="{% url 'liste_objets' %}" class="hidden rounded-full px-4 py-2 text-sm font-semibold text-ink transition hover:bg-paper sm:inline-flex">Les objets</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'mes_reclamations' %}" class="rounded-full px-3 py-2 text-sm font-semibold text-ink transition hover:bg-paper sm:px-4">Mes réclamations</a>
+          {% if user.is_staff %}
+            <a href="{% url 'gestion_reclamations' %}" class="hidden rounded-full px-4 py-2 text-sm font-semibold text-ink transition hover:bg-paper md:inline-flex">Gestion</a>
+            <a href="{% url 'ajouter_objet' %}" class="hidden rounded-full bg-forest px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#174737] lg:inline-flex">+ Ajouter un objet</a>
+          {% endif %}
+          <form method="post" action="{% url 'logout' %}" class="ml-1">
+            {% csrf_token %}
+            <button type="submit" class="rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-ink transition hover:border-ink hover:bg-ink hover:text-white">Quitter</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-forest">Connexion</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+  <main class="mx-auto min-h-[calc(100vh-150px)] max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
+    {% if messages %}
+      <div class="mx-auto mb-6 max-w-4xl space-y-3">
+        {% for message in messages %}
+          <div role="status" class="rounded-2xl border px-5 py-4 text-sm font-medium {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-800{% else %}border-emerald-200 bg-emerald-50 text-emerald-900{% endif %}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="border-t border-black/[.06] bg-white">
+    <div class="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <p class="font-semibold text-ink">Retrouvé<span class="text-forest">.</span> <span class="font-normal text-muted">Le campus se retrouve.</span></p>
+      <p>Un service de proximité pour les objets égarés.</p>
+    </div>
+  </footer>
+  {% if user.is_authenticated %}
+    <div id="status-notifications" class="fixed bottom-5 right-5 z-50 flex w-[min(24rem,calc(100vw-2.5rem))] flex-col gap-3" aria-live="polite" aria-atomic="false"></div>
+    <script>
+      (() => {
+        const endpoint = "{% url 'notifications_reclamations' %}";
+        const container = document.getElementById("status-notifications");
+
+        function showNotification(notification) {
+          const card = document.createElement("section");
+          card.className = "notification-arrive rounded-2xl border border-emerald-100 bg-white p-4 shadow-soft";
+          card.setAttribute("role", "status");
+
+          const row = document.createElement("div");
+          row.className = "flex items-start gap-3";
+          const icon = document.createElement("span");
+          icon.className = "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mint text-lg";
+          icon.textContent = notification.etat === "Refusée" ? "↻" : "✦";
+
+          const content = document.createElement("div");
+          content.className = "min-w-0 flex-1";
+          const title = document.createElement("p");
+          title.className = "font-bold text-ink";
+          title.textContent = notification.etat === "Acceptée" ? "Bonne nouvelle !" : "Votre demande évolue";
+          const message = document.createElement("p");
+          message.className = "mt-1 text-sm leading-5 text-muted";
+          message.textContent = `« ${notification.objet} » : ${notification.etat.toLowerCase()}.`;
+          const link = document.createElement("a");
+          link.className = "mt-2 inline-flex text-sm font-bold text-forest hover:underline";
+          link.href = notification.url;
+          link.textContent = "Voir ma réclamation →";
+          content.append(title, message, link);
+
+          const close = document.createElement("button");
+          close.className = "rounded-lg px-2 text-lg leading-6 text-muted hover:bg-paper";
+          close.type = "button";
+          close.setAttribute("aria-label", "Fermer la notification");
+          close.textContent = "×";
+          close.addEventListener("click", () => card.remove());
+          row.append(icon, content, close);
+          card.append(row);
+          container.append(card);
+          window.setTimeout(() => card.remove(), 10000);
+        }
+
+        async function checkStatusChanges() {
+          try {
+            const response = await fetch(endpoint, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+            if (!response.ok) throw new Error(`Notification status check failed: ${response.status}`);
+            const data = await response.json();
+            data.notifications.forEach(showNotification);
+          } catch (error) {
+            console.error("Impossible de vérifier les changements de réclamation.", error);
+          }
+        }
+
+        checkStatusChanges();
+        window.setInterval(checkStatusChanges, 20000);
+      })();
+    </script>
+  {% endif %}
+</body>
+</html>

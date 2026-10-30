@@ -1,0 +1,31 @@
+{% extends "objets_trouves/base.html" %}
+{% block title %}Connexion · Retrouvé{% endblock %}
+{% block content %}
+  <div class="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-black/[.06] bg-white shadow-soft lg:grid-cols-2">
+    <section class="relative isolate flex min-h-72 flex-col justify-between overflow-hidden bg-ink p-8 text-white sm:p-10 lg:p-12">
+      <div class="absolute -right-20 -top-20 -z-10 h-72 w-72 rounded-full bg-forest blur-3xl"></div>
+      <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-emerald-200">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+      </div>
+      <div class="mt-12">
+        <p class="text-sm font-bold uppercase tracking-[.15em] text-emerald-200">Heureux de vous revoir</p>
+        <h1 class="mt-3 text-3xl font-extrabold leading-tight sm:text-4xl">Chaque objet mérite de retrouver son chemin.</h1>
+        <p class="mt-4 leading-7 text-white/65">Connectez-vous pour suivre vos réclamations et récupérer ce qui vous appartient.</p>
+      </div>
+      <a href="{% url 'liste_objets' %}" class="mt-8 text-sm font-semibold text-white/75 transition hover:text-white">← Retour aux objets trouvés</a>
+    </section>
+    <section class="p-8 sm:p-10 lg:p-12">
+      <p class="text-sm font-bold uppercase tracking-[.15em] text-forest">Votre espace campus</p>
+      <h2 class="mt-2 text-3xl font-extrabold tracking-tight">Connexion</h2>
+      <p class="mt-2 text-sm text-muted">Saisissez vos identifiants pour continuer.</p>
+      {% if form.errors %}<div role="alert" class="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">Nom d’utilisateur ou mot de passe incorrect. Veuillez réessayer.</div>{% endif %}
+      <form method="post" class="mt-7">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {{ form.as_p }}
+        <button type="submit" class="mt-2 w-full rounded-xl bg-forest px-5 py-3.5 font-bold text-white transition hover:bg-[#174737]">Se connecter <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="mt-6 text-center text-xs leading-5 text-muted">Vous n’avez pas encore de compte&nbsp;? Contactez l’administration du campus.</p>
+    </section>
+  </div>
+{% endblock %}

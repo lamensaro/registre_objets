@@ -1,0 +1,28 @@
+{% extends "objets_trouves/base.html" %}
+{% block title %}Gestion des réclamations{% endblock %}
+{% block content %}
+  <div class="mx-auto max-w-5xl">
+    <p class="text-sm font-bold uppercase tracking-[.15em] text-forest">Espace gestionnaire</p>
+    <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div><h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Réclamations</h1><p class="mt-2 text-muted">Examinez les demandes et aidez les objets à retrouver leur propriétaire.</p></div>
+      <a href="/admin/" class="inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm font-bold transition hover:border-ink">Administration <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="mt-8 overflow-hidden rounded-3xl border border-black/[.06] bg-white shadow-sm">
+      <div class="hidden grid-cols-[1fr_1.2fr_1fr_auto] gap-4 border-b border-black/[.06] bg-paper px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted sm:grid"><span>Objet</span><span>Réclamant</span><span>Déposée le</span><span>État</span></div>
+      {% for reclamation in reclamations %}
+        <a href="{% url 'detail_gestion_reclamation' reclamation.pk %}" class="grid gap-3 border-b border-black/[.06] px-5 py-5 transition last:border-0 hover:bg-[#fbfcfb] sm:grid-cols-[1fr_1.2fr_1fr_auto] sm:items-center sm:gap-4 sm:px-6">
+          <div><span class="text-xs font-semibold text-muted">Objet</span><p class="mt-1 font-bold">{{ reclamation.objet.get_categorie_display }} · {{ reclamation.objet.description }}</p></div>
+          <div><span class="text-xs font-semibold text-muted sm:hidden">Réclamant</span><p class="mt-1 sm:mt-0">{{ reclamation.auteur }}</p></div>
+          <p class="text-sm text-muted">{{ reclamation.cree_le|date:"d/m/Y à H:i" }}</p>
+          <span class="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold {% if reclamation.etat == 'acceptee' or reclamation.etat == 'remise' %}bg-emerald-50 text-forest{% elif reclamation.etat == 'refusee' %}bg-red-50 text-red-700{% else %}bg-amber-50 text-amber-800{% endif %}"><span class="h-1.5 w-1.5 rounded-full bg-current"></span>{{ reclamation.get_etat_display }}</span>
+        </a>
+      {% empty %}
+        <div class="px-6 py-16 text-center">
+          <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-mint text-2xl">✓</span>
+          <h2 class="mt-4 text-lg font-bold">Tout est à jour</h2>
+          <p class="mt-2 text-sm text-muted">Aucune réclamation à traiter pour le moment.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

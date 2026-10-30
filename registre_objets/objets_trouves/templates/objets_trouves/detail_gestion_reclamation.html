@@ -1,0 +1,52 @@
+{% extends "objets_trouves/base.html" %}
+{% block title %}Traiter la réclamation #{{ reclamation.pk }}{% endblock %}
+{% block content %}
+  <div class="mx-auto max-w-4xl">
+    <a href="{% url 'gestion_reclamations' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-forest"><span aria-hidden="true">←</span> Toutes les réclamations</a>
+    <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
+      <section class="rounded-[2rem] border border-black/[.06] bg-white p-7 shadow-soft sm:p-9">
+        <p class="text-sm font-bold uppercase tracking-[.15em] text-forest">Réclamation #{{ reclamation.pk }}</p>
+        <h1 class="mt-3 text-3xl font-extrabold tracking-tight">{{ reclamation.objet.get_categorie_display }} · {{ reclamation.objet.description }}</h1>
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <span class="rounded-full bg-paper px-3 py-1.5 text-sm font-semibold">{{ reclamation.auteur }}</span>
+          <span class="rounded-full px-3 py-1.5 text-xs font-bold {% if reclamation.etat == 'acceptee' or reclamation.etat == 'remise' %}bg-emerald-50 text-forest{% elif reclamation.etat == 'refusee' %}bg-red-50 text-red-700{% else %}bg-amber-50 text-amber-800{% endif %}">{{ reclamation.get_etat_display }}</span>
+        </div>
+        <div class="mt-8 border-t border-black/[.06] pt-6">
+          <p class="text-xs font-bold uppercase tracking-wide text-muted">Informations privées du réclamant</p>
+          <p class="mt-3 rounded-2xl bg-paper p-5 leading-7 text-ink">{{ reclamation.description_complementaire|linebreaksbr }}</p>
+        </div>
+        {% if reclamation.note_decision %}
+          <div class="mt-6"><p class="text-xs font-bold uppercase tracking-wide text-muted">Note précédente</p><p class="mt-3 leading-7 text-muted">{{ reclamation.note_decision|linebreaksbr }}</p></div>
+        {% endif %}
+      </section>
+      <aside class="h-fit rounded-[2rem] bg-[#eaf2ed] p-7">
+        {% if reclamation.etat == "en_attente" %}
+          <p class="text-sm font-bold uppercase tracking-[.15em] text-forest">Décision</p>
+          <h2 class="mt-2 text-xl font-extrabold">Traiter la demande</h2>
+          <p class="mt-2 text-sm leading-6 text-muted">Vérifiez les informations avant de prendre une décision.</p>
+          <form method="post" class="mt-6">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" name="action" value="accepter" class="mb-2 w-full rounded-xl bg-forest px-4 py-3 font-bold text-white transition hover:bg-[#174737]">Accepter la réclamation</button>
+            <button type="submit" name="action" value="refuser" class="w-full rounded-xl border border-red-200 bg-white px-4 py-3 font-bold text-red-700 transition hover:bg-red-50">Refuser la réclamation</button>
+          </form>
+        {% elif reclamation.etat == "acceptee" %}
+          <p class="text-sm font-bold uppercase tracking-[.15em] text-forest">Étape suivante</p>
+          <h2 class="mt-2 text-xl font-extrabold">Confirmer la remise</h2>
+          <p class="mt-2 text-sm leading-6 text-muted">Enregistrez la remise de l’objet à {{ reclamation.auteur }} une fois effectuée.</p>
+          <form method="post" class="mt-6">
+            {% csrf_token %}
+            <button type="submit" name="action" value="remettre" class="w-full rounded-xl bg-forest px-4 py-3 font-bold text-white transition hover:bg-[#174737]">Enregistrer la remise</button>
+          </form>
+        {% elif reclamation.etat == "remise" %}
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-forest">✓</div>
+          <h2 class="mt-4 text-xl font-extrabold">Objet remis</h2>
+          {% if reclamation.remise_le %}<p class="mt-2 text-sm text-muted">Remise enregistrée le {{ reclamation.remise_le|date:"d/m/Y à H:i" }}.</p>{% endif %}
+        {% else %}
+          <h2 class="text-xl font-extrabold">Demande clôturée</h2>
+          <p class="mt-2 text-sm leading-6 text-muted">Cette réclamation a été refusée et ne nécessite plus d’action.</p>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+{% endblock %}

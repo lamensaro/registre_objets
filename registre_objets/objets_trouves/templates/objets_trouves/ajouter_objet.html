@@ -1,0 +1,61 @@
+{% extends "objets_trouves/base.html" %}
+{% block title %}Publier un objet retrouvé{% endblock %}
+{% block content %}
+  <div class="mx-auto max-w-5xl">
+    <a href="{% url 'liste_objets' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-forest"><span aria-hidden="true">←</span> Retour au registre</a>
+    <div class="mt-6 grid overflow-hidden rounded-[2rem] border border-black/[.06] bg-white shadow-soft lg:grid-cols-[.8fr_1.2fr]">
+      <section class="relative isolate flex flex-col justify-between overflow-hidden bg-ink p-8 text-white sm:p-10">
+        <div class="absolute -right-20 -top-20 -z-10 h-72 w-72 rounded-full bg-forest blur-3xl"></div>
+        <div>
+          <span class="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-100">Espace gestionnaire</span>
+          <h1 class="mt-6 text-3xl font-extrabold leading-tight sm:text-4xl">Un objet retrouvé, un propriétaire rassuré.</h1>
+          <p class="mt-4 leading-7 text-white/70">Ajoutez les informations utiles pour que son propriétaire puisse le reconnaître et déposer une réclamation.</p>
+        </div>
+        <div class="mt-10 rounded-2xl border border-white/10 bg-white/[.06] p-5 text-sm leading-6 text-white/70">
+          La photo est facultative. Évitez d’y montrer des informations personnelles ou des détails confidentiels qui aideraient une fausse réclamation.
+        </div>
+      </section>
+      <section class="p-7 sm:p-10">
+        <p class="text-sm font-bold uppercase tracking-[.15em] text-forest">Nouveau dans le registre</p>
+        <h2 class="mt-2 text-2xl font-extrabold tracking-tight">Publier un objet</h2>
+        <p class="mt-2 text-sm text-muted">Les champs marqués comme obligatoires doivent être renseignés.</p>
+        <form method="post" enctype="multipart/form-data" class="mt-7">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div id="image-preview-container" class="mb-5 hidden">
+            <p class="mb-2 text-xs font-bold uppercase tracking-wide text-muted">Aperçu de la photo</p>
+            <img id="image-preview" alt="Aperçu de la photo sélectionnée" class="max-h-64 w-full rounded-2xl bg-paper object-contain">
+          </div>
+          <button type="submit" class="w-full rounded-xl bg-forest px-5 py-3.5 font-bold text-white transition hover:bg-[#174737]">Publier dans le registre <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const input = document.getElementById("id_image");
+      const container = document.getElementById("image-preview-container");
+      const preview = document.getElementById("image-preview");
+      if (!input || !container || !preview) return;
+
+      input.addEventListener("change", () => {
+        const file = input.files && input.files[0];
+        if (!file) {
+          preview.removeAttribute("src");
+          container.classList.add("hidden");
+          return;
+        }
+        if (!file.type.startsWith("image/")) {
+          input.setCustomValidity("Choisissez un fichier image.");
+          input.reportValidity();
+          input.value = "";
+          container.classList.add("hidden");
+          return;
+        }
+        input.setCustomValidity("");
+        preview.src = URL.createObjectURL(file);
+        container.classList.remove("hidden");
+      });
+    })();
+  </script>
+{% endblock %}

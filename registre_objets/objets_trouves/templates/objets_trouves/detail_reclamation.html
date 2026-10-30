@@ -1,0 +1,35 @@
+{% extends "objets_trouves/base.html" %}
+{% block title %}Suivi de la réclamation{% endblock %}
+{% block content %}
+  <div class="mx-auto max-w-3xl">
+    <a href="{% url 'mes_reclamations' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-forest"><span aria-hidden="true">←</span> Mes réclamations</a>
+    <section class="mt-6 overflow-hidden rounded-[2rem] border border-black/[.06] bg-white shadow-soft">
+      <div class="bg-ink px-7 py-8 text-white sm:px-10">
+        <p class="text-sm font-bold uppercase tracking-[.15em] text-emerald-200">Suivi de votre demande</p>
+        <h1 class="mt-3 text-2xl font-extrabold sm:text-3xl">{{ reclamation.objet.get_categorie_display }} · {{ reclamation.objet.description }}</h1>
+        <div class="mt-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold">
+          <span class="h-2 w-2 rounded-full {% if reclamation.etat == 'refusee' %}bg-red-300{% elif reclamation.etat == 'acceptee' or reclamation.etat == 'remise' %}bg-emerald-300{% else %}bg-amber-300{% endif %}"></span>{{ reclamation.get_etat_display }}
+        </div>
+      </div>
+      <div class="space-y-7 p-7 sm:p-10">
+        <div class="flex gap-4">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-paper text-forest">◷</span>
+          <div><p class="text-xs font-bold uppercase tracking-wide text-muted">Demande déposée</p><p class="mt-1 font-semibold">{{ reclamation.cree_le|date:"d/m/Y à H:i" }}</p></div>
+        </div>
+        <div>
+          <h2 class="font-bold">Les informations transmises</h2>
+          <p class="mt-3 rounded-2xl bg-paper p-5 leading-7 text-muted">{{ reclamation.description_complementaire|linebreaksbr }}</p>
+        </div>
+        {% if reclamation.note_decision %}
+          <div>
+            <h2 class="font-bold">Message du gestionnaire</h2>
+            <p class="mt-3 rounded-2xl bg-mint p-5 leading-7 text-ink">{{ reclamation.note_decision|linebreaksbr }}</p>
+          </div>
+        {% endif %}
+        {% if reclamation.remise_le %}
+          <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5 text-sm font-semibold text-forest">Remise enregistrée le {{ reclamation.remise_le|date:"d/m/Y à H:i" }}. Votre objet a retrouvé son chemin&nbsp;!</div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

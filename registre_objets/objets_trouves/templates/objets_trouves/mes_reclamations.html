@@ -1,0 +1,31 @@
+{% extends "objets_trouves/base.html" %}
+{% block title %}Mes réclamations{% endblock %}
+{% block content %}
+  <div class="mx-auto max-w-4xl">
+    <p class="text-sm font-bold uppercase tracking-[.15em] text-forest">Mon espace</p>
+    <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div><h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Mes réclamations</h1><p class="mt-2 text-muted">Suivez ici l’avancement de vos demandes.</p></div>
+      <a href="{% url 'liste_objets' %}" class="inline-flex items-center gap-2 text-sm font-bold text-forest hover:underline">Explorer les objets <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="mt-8 space-y-3">
+      {% for reclamation in reclamations %}
+        <a href="{% url 'detail_reclamation' reclamation.pk %}" class="group flex flex-col gap-4 rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm transition hover:border-forest/20 hover:shadow-soft sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div class="flex items-center gap-4">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint text-xl">◇</span>
+            <div><h2 class="font-bold group-hover:text-forest">{{ reclamation.objet.get_categorie_display }} · {{ reclamation.objet.description }}</h2><p class="mt-1 text-sm text-muted">Déposée le {{ reclamation.cree_le|date:"d/m/Y à H:i" }}</p></div>
+          </div>
+          <span class="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold {% if reclamation.etat == 'acceptee' or reclamation.etat == 'remise' %}bg-emerald-50 text-forest{% elif reclamation.etat == 'refusee' %}bg-red-50 text-red-700{% else %}bg-amber-50 text-amber-800{% endif %}">
+            <span class="h-1.5 w-1.5 rounded-full bg-current"></span>{{ reclamation.get_etat_display }}
+          </span>
+        </a>
+      {% empty %}
+        <div class="rounded-3xl border border-dashed border-black/15 bg-white px-6 py-16 text-center">
+          <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-mint text-2xl">◇</span>
+          <h2 class="mt-4 text-lg font-bold">Pas encore de réclamation</h2>
+          <p class="mt-2 text-sm text-muted">Quand vous en déposerez une, son suivi apparaîtra ici.</p>
+          <a href="{% url 'liste_objets' %}" class="mt-5 inline-flex rounded-xl bg-forest px-5 py-3 text-sm font-bold text-white hover:bg-[#174737]">Voir les objets</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
